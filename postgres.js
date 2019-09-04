@@ -137,23 +137,26 @@ module.exports = function(RED) {
 
                         if (!!!msg.queryParameters)
                             msg.queryParameters = {};
-
-                        client.query(
-                            msg.payload,
-                            msg.queryParameters,
-                            function(err, results) {
-                                done();
-                                if (err) {
-                                    handleError(err, msg);
-                                } else {
-                                    if (node.output) {
-                                        msg.payload = results.rows;
-                                        node.send(msg);
+                        try {
+                            client.query(
+                                msg.payload,
+                                msg.queryParameters,
+                                function(err, results) {
+                                    done();
+                                    if (err) {
+                                        handleError(err, msg);
+                                    } else {
+                                        if (node.output) {
+                                            msg.payload = results.rows;
+                                            node.send(msg);
+                                        }
                                     }
+                                    client.end();
                                 }
-                                client.end();
-                            }
-                        );
+                            );
+                        } catch(ex){
+                            client.end();
+                        }
                     }
                 });
             });
